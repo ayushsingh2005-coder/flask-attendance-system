@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance - Attendance System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-check-circle"></i> Mark Attendance
+        </h1>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-check"></i> Mark Student Attendance
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if students %}
+                    <form method="POST" id="attendanceForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="student_id" class="form-label">
+                                    <i class="fas fa-user"></i> Select Student *
+                                </label>
+                                <select class="form-select" id="student_id" name="student_id" required>
+                                    <option value="">Choose a student...</option>
+                                    {% for student in students %}
+                                        <option value="{{ student.id }}">
+                                            {{ student.name }} ({{ student.roll_number }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="date" class="form-label">
+                                    <i class="fas fa-calendar"></i> Date *
+                                </label>
+                                <input type="date" class="form-control" id="date" name="date" 
+                                       value="{{ today }}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-clipboard-check"></i> Attendance Status *
+                            </label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" 
+                                               id="present" value="Present" checked>
+                                        <label class="form-check-label" for="present">
+                                            <i class="fas fa-check-circle text-success"></i> Present
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" 
+                                               id="absent" value="Absent">
+                                        <label class="form-check-label" for="absent">
+                                            <i class="fas fa-times-circle text-danger"></i> Absent
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" 
+                                               id="late" value="Late">
+                                        <label class="form-check-label" for="late">
+                                            <i class="fas fa-clock text-warning"></i> Late
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">
+                                <i class="fas fa-sticky-note"></i> Notes (Optional)
+                            </label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="Any additional notes about attendance..."></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Mark Attendance
+                            </button>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-user-times fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Students Available</h4>
+                        <p class="text-muted">You need to add students before marking attendance.</p>
+                        <a href="{{ url_for('add_student') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add First Student
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Mark Section -->
+{% if students %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt"></i> Quick Mark All Present
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Mark all students as present for today with one click:</p>
+                <button class="btn btn-outline-success" onclick="quickMarkAll()">
+                    <i class="fas fa-users-check"></i> Mark All Present for Today
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Form validation
+document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+    var studentId = document.getElementById('student_id').value;
+    var date = document.getElementById('date').value;
+    
+    if (!studentId) {
+        e.preventDefault();
+        alert('Please select a student.');
+        return false;
+    }
+    
+    if (!date) {
+        e.preventDefault();
+        alert('Please select a date.');
+        return false;
+    }
+});
+
+// Quick mark all function
+function quickMarkAll() {
+    if (confirm('Are you sure you want to mark all students as present for today?')) {
+        // This would need additional backend route implementation
+        alert('This feature would mark all students present. Implementation can be added to the backend.');
+    }
+}
+
+// Update form based on status selection
+document.querySelectorAll('input[name="status"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        var notesField = document.getElementById('notes');
+        if (this.value === 'Absent') {
+            notesField.placeholder = 'Reason for absence...';
+        } else if (this.value === 'Late') {
+            notesField.placeholder = 'Reason for being late...';
+        } else {
+            notesField.placeholder = 'Any additional notes...';
+        }
+    });
+});
+</script>
+{% endblock %}
